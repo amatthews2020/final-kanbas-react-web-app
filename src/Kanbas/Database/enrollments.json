@@ -1,0 +1,12 @@
+[
+    { "user": "123", "course": "RS101" },
+    { "user": "234", "course": "RS101" },
+    { "user": "345", "course": "RS101" },
+    { "user": "456", "course": "RS101" },
+    { "user": "567", "course": "RS101" },
+    { "user": "234", "course": "RS102" },
+    { "user": "789", "course": "RS102" },
+    { "user": "890", "course": "RS102" },
+    { "user": "123", "course": "RS102" }
+  ]
+  

@@ -9,8 +9,12 @@ import { IoMdArrowDropdown } from "react-icons/io";
 import AssignmentControlButtons from "../Assignments/AssignmentControlButton";
 import { FaPlus } from "react-icons/fa6";
 import { RxRocket } from "react-icons/rx";
-import { setQuizzes } from "./reducer";
-import { MdOutlineAssignment } from "react-icons/md";
+import { setQuizzes, updateQuiz } from "./reducer";
+import { GoCircleSlash } from "react-icons/go";
+import GreenCheckmark from "../Modules/GreenCheckmark";
+import * as quizzesClient from "./client"
+
+
 
 export default function Quizzes() {
     const { cid, qid } = useParams();
@@ -18,12 +22,13 @@ export default function Quizzes() {
     const { currentUser } = useSelector((state: any) => state.accountReducer);
     const dispatch = useDispatch();
 
-    const fetchAssignments = async () => {
-        const assignments = await coursesClient.findQuizzesForCourse(cid as string);
-        dispatch(setQuizzes(assignments));
+    const fetchQuizzes = async () => {
+        const quizzes = await coursesClient.findQuizzesForCourse(cid as string);
+        console.log(quizzes);
+        dispatch(setQuizzes(quizzes));
       };
       useEffect(() => {
-        fetchAssignments();
+        fetchQuizzes();
       }, []);
 
     const availability = (quiz: any) => {
@@ -43,6 +48,24 @@ export default function Quizzes() {
         } else {
           return <b>Closed</b>;
         }
+    }
+    
+    // Toggle publish status, had to do it the way below because component wasn't rerendering properly on click
+    const togglePublish = async (quiz: any) => {
+        const newQuiz = { ...quiz, published: !quiz.published };
+
+        // Optimistically update the state
+        dispatch(updateQuiz(newQuiz));
+        try {
+            // Try to update 
+            const updatedQuiz = await quizzesClient.updateQuiz(newQuiz);
+            dispatch(updateQuiz(updatedQuiz));
+        } catch (error) {
+            console.error("Failed to update quiz:", error);
+            // Optionally, rollback the optimistic update in case of an error
+            dispatch(updateQuiz(quiz));
+    }
+        
     }
 
     return (
@@ -70,46 +93,18 @@ export default function Quizzes() {
                                         <b> Due </b> {quiz.due} | {quiz.points} Points
                                     </span>
                                 </div>
+                                <div className="float-end mt-4  mx-3 fs-4" onClick={() => togglePublish(quiz)}>
+                                    {quiz.published ? 
+                                        <GreenCheckmark /> :
+                                        <GoCircleSlash className="text-danger"/>}
+                                </div>
+
                             </li>
                             
                         )}
                     </ul>
                 </li>
             </ul>
-
-          {/* <ul id="wd-quiz" className="list-group rounded-0 mx-5">
-            <li className="wd-module list-group-item p-0 mb-5 fs-5 border-gray">
-                <div className="wd-title p-3 ps-2 bg-secondary"> 
-                <BsGripVertical className="me-2 fs-3 " />
-                <IoMdArrowDropdown className=""/>
-                <span className="fs-4 ">Quizzes</span>
-                <AssignmentControlButtons />
-                <FaPlus className="me-2 float-end" />
-                <span className="border border-dark rounded float-end mx-3 px-2">40% of Total</span>
-                </div>
-                <ul className="wd-lessons list-group rounded-0">
-                {assignments
-                    .map((assignment: any) => 
-                    <li className="wd-lesson list-group-item p-3 ps-1">
-                        <BsGripVertical className="me-2 fs-3 float-start mt-4" />
-                        <MdOutlineAssignment className="text-success me-4 fs-3  float-start mt-4" />
-                        <div className="float-start">
-                        <a className="wd-assignment-link text-decoration-none text-dark fs-4 "
-                            href={`#/Kanbas/Courses/${cid}/Assignments/${currentUser.role === "FACULTY" ? assignment._id : ""}`}>
-                            {assignment.title}
-                        </a> <br/>
-                        <span className="fs-6 ">
-                            <span className="text-danger">Multiple Modules</span> | <b>Not Available Until</b> {assignment.available} |<br/>
-                            <b>Due</b> {assignment.due} | {assignment.points} Points
-                        </span>
-                    
-                        </div>
-                        <LessonControlButton assignId={assignment._id} deleteAssignment={confirmDeleteAssignment}/>
-                    </li>
-                    )} 
-                </ul>
-            </li>
-            </ul> */}
         </div>
     );
 

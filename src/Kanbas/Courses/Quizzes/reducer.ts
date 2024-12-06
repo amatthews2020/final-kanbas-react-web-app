@@ -18,7 +18,8 @@ const quizzesSlice = createSlice({
         desc: quiz.desc, 
         points: quiz.points, 
         due: quiz.due, 
-        available: quiz.available
+        available: quiz.available,
+        published: quiz.published,
       };
       state.quizzes = [...state.quizzes, newQuiz] as any;
     },

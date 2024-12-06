@@ -34,7 +34,6 @@ const quizzesSlice = createSlice({
         required_to_view: quiz.required_to_view,
         webcam: quiz.webcam,
         lock_questions_after_answering: quiz.lock_questions_after_answering,
-        questions: quiz.questions,
       };
       state.quizzes = [...state.quizzes, newQuiz] as any;
     },

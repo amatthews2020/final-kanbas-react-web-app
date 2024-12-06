@@ -9,10 +9,11 @@ import { IoMdArrowDropdown } from "react-icons/io";
 import AssignmentControlButtons from "../Assignments/AssignmentControlButton";
 import { FaPlus } from "react-icons/fa6";
 import { RxRocket } from "react-icons/rx";
-import { setQuizzes, updateQuiz } from "./reducer";
+import { setQuizzes, updateQuiz, deleteQuiz } from "./reducer";
 import { GoCircleSlash } from "react-icons/go";
 import GreenCheckmark from "../Modules/GreenCheckmark";
 import * as quizzesClient from "./client"
+import QuizControlButton from "./QuizControlButton";
 
 
 
@@ -27,10 +28,22 @@ export default function Quizzes() {
         console.log(quizzes);
         dispatch(setQuizzes(quizzes));
       };
+
+    //Delete quiz
+    const removeQuiz = async (quizId: string) => {
+        await quizzesClient.deleteQuiz(quizId);
+        dispatch(deleteQuiz(quizId));
+    }
+
+    const upQuiz = async (quiz: any) => {
+        console.log("updating the quiz" + quiz);
+    }
+
       useEffect(() => {
         fetchQuizzes();
       }, []);
 
+    // Get the availability for the list group
     const availability = (quiz: any) => {
         const currentDate = new Date();
         const availableDate = new Date(quiz.available); // Quiz available start date
@@ -93,11 +106,11 @@ export default function Quizzes() {
                                         <b> Due </b> {quiz.due} | {quiz.points} Points
                                     </span>
                                 </div>
-                                <div className="float-end mt-4  mx-3 fs-4" onClick={() => togglePublish(quiz)}>
-                                    {quiz.published ? 
-                                        <GreenCheckmark /> :
-                                        <GoCircleSlash className="text-danger"/>}
-                                </div>
+                                <QuizControlButton 
+                                  quiz={quiz} 
+                                  togglePublish={togglePublish}
+                                  deleteQuiz={removeQuiz}
+                                  editQuiz={upQuiz}/>
 
                             </li>
                             

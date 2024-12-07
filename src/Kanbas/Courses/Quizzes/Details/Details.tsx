@@ -24,7 +24,7 @@ export default function QuizDetails() {
         <div className="container">
             <div className="row wd-full-width">
                 <div>
-                    <DetailHeaderButtons />
+                    <DetailHeaderButtons path={`/Kanbas/Courses/${cid}/Quizzes/${qid}/Preview`}/>
                 </div>
             </div>
             <hr />

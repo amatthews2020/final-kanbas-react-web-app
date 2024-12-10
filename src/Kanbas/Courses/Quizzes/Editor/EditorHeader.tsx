@@ -13,10 +13,10 @@ export default function EditorHeader({ points, published }: { points: number, pu
                     <p className="mb-0 mx-3">Points: {points}</p>
                     <GreenCheckmark /> <p className="mb-0 "> Published</p>
                 </div> :
-                <div className="d-flex align-items-center mt-2">
-                    <p>Points: {points}</p>
+                <div className="d-flex align-items-center mx-3 mt-2">
+                    <p className="mb-0 mx-3">Points: {points}</p>
                     <GoCircleSlash className="text-danger" />
-                    <p className="mb-0 ms-2"> Not Published</p>
+                    <p className="mb-0 mx-1"> Not Published</p>
                 </div>
             }
         </div>

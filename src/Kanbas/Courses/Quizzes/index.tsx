@@ -19,6 +19,7 @@ import QuizControlButton from "./QuizControlButton";
 
 export default function Quizzes() {
   const { cid, qid } = useParams();
+  const navigate = useNavigate();
   const { quizzes } = useSelector((state: any) => state.quizzesReducer);
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const dispatch = useDispatch();
@@ -35,8 +36,8 @@ export default function Quizzes() {
     dispatch(deleteQuiz(quizId));
   }
 
-  const upQuiz = async (quiz: any) => {
-    console.log("updating the quiz" + quiz);
+  const upQuiz = async (quiz_id: any) => {
+    navigate(`/Kanbas/Courses/${cid}/Quizzes/${quiz_id}/Editor`);
   }
 
   useEffect(() => {

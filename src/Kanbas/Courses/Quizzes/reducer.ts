@@ -43,6 +43,7 @@ const quizzesSlice = createSlice({
 
     },
     updateQuiz: (state, { payload: quiz }) => {
+      console.log("Quiz", quiz);
       state.quizzes = state.quizzes.map((q: any) =>
         q._id === quiz._id ? quiz : q
       ) as any;

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams } from "react-router";
-import DetailHeaderButtons from "./DetailHeaderButtons";;
+import DetailHeaderButtons from "./DetailHeaderButtons";
+
 
 export default function QuizDetails() {
     const { cid, qid } = useParams();
@@ -20,11 +21,12 @@ export default function QuizDetails() {
 
 
 
+
     return (
         <div className="container">
             <div className="row wd-full-width">
                 <div>
-                    <DetailHeaderButtons path={`/Kanbas/Courses/${cid}/Quizzes/${qid}/Preview`}/>
+                    <DetailHeaderButtons path={`/Kanbas/Courses/${cid}/Quizzes/${qid}/Preview`} />
                 </div>
             </div>
             <hr />

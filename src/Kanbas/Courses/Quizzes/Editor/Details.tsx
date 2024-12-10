@@ -69,21 +69,17 @@ export default function Details() {
             </div>
             <div className="row mx-3 mt-3">
                 <div className="col-5 text-end mt-2">
-                    <input className="mx-1" type="checkbox" checked={quiz.time_limit}
-                        onChange={(e) => setQuiz({ ...quiz, time_limit: !quiz.time_limit })}></input>
+                    <input className="mx-1" type="checkbox" checked={quiz.time_limit !== "0"}
+                        onChange={(e) => setQuiz({ ...quiz, time_limit: quiz.time_limit !== "0" ? "0" : "60" })}></input>
                     <label>Time Limit </label>
-                    {quiz.time_limit &&
+                    {quiz.time_limit !== "0" &&
                         <>
-                            <input type="number" className="form-control" value={quiz.time_limit} ></input>
+                            <input type="number" className="form-control" value={quiz.time_limit} onChange={(e) => setQuiz({ ...quiz, time_limit: e.target.value })}></input>
                             <label>Minutes </label>
                         </>
                     }
                 </div>
             </div>
-
-
-
-
         </div>
     )
 }

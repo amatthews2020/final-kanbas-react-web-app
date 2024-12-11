@@ -1,4 +1,22 @@
-export default function FillInBlankQuestion({ question }: { question: any }) {
+export default function FillInBlankQuestion({ 
+    question, 
+    onAnswer,
+    taking,
+    userAnswer, } : 
+    { question: any, 
+      onAnswer?: (questionId: string, answer: string) => void,
+      taking?: boolean; // Optional flag to check if the user is taking the quiz
+      userAnswer?: string; }) {
+
+    const handleAnswerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (onAnswer) {
+            onAnswer(question._id, e.target.value);
+        }
+    };
+    
+
+    const isCorrect = userAnswer === question.answer;
+
     return (
         <div className="d-flex justify-content-center align-items-center">
             <div
@@ -12,6 +30,11 @@ export default function FillInBlankQuestion({ question }: { question: any }) {
                 >
                     <h5 className="card-title mb-0">{question.title}</h5>
                     <span>{question.points} pts</span>
+                    {!taking && (
+                        <span className={`text-${isCorrect ? "success" : "danger"}`}>
+                            {isCorrect ? "Correct" : "Incorrect"}
+                        </span>
+                    )}
                 </div>
 
                 <div className="card-body">
@@ -20,10 +43,13 @@ export default function FillInBlankQuestion({ question }: { question: any }) {
                     </div>
                     
                     <div className="text-center mt-2 mb-5">
-                        <input
+                    <input
                             type="text"
                             className="form-control d-inline w-auto"
                             style={{ width: "120px", display: "inline" }}
+                            defaultValue={userAnswer || ""} // If not taking, show the user's answer
+                            onChange={handleAnswerChange}
+                            disabled={!taking} // Disable input if not taking
                         />
                             
                     </div>

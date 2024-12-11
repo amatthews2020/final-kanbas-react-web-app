@@ -10,7 +10,7 @@ export default function QuizControls() {
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const details = () => {
     
-    navigate(`/Kanbas/Courses/${cid}/Quizzes/New`);
+    navigate(`/Kanbas/Courses/${cid}/Quizzes/New/Editor`);
   };
 
   return (

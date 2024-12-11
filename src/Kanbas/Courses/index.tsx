@@ -12,18 +12,23 @@ import { useEffect, useState } from "react";
 import Quizzes from "./Quizzes";
 import QuizDetails from "./Quizzes/Details/Details";
 import QuizPreview from "./Quizzes/Preview";
+import QuizEditor from "./Quizzes/Editor/QuizEditor";
+import EditorIndex from "./Quizzes/Editor";
+import { useSelector } from "react-redux";
 
 export default function Courses({ courses }: { courses: any[]; }) {
   const { cid } = useParams();
   const course = courses.find((course) => course._id === cid);
   const { pathname } = useLocation();
   const [users, setUsers] = useState<any[]>([]);
+  const { attempts } = useSelector((state: any) => state.accountReducer);
   const fetchUsers = async () => {
     if (cid) {
       const users = await courseClient.findUsersForCourse(cid);
       setUsers(users);
     }
   };
+  
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -50,7 +55,9 @@ export default function Courses({ courses }: { courses: any[]; }) {
             <Route path="Assignments/:aid" element={<AssignmentEditor />} />
             <Route path="Quizzes" element={<Quizzes />} />
             <Route path="Quizzes/:qid" element={<QuizDetails />} />
+            <Route path="Quizzes/:qid/Editor/*" element={<EditorIndex />} />
             <Route path="Quizzes/:qid/Preview" element={<QuizPreview />} />
+            <Route path="Quizzes/:qid/Attempt" element={<QuizPreview />} />
             <Route path="People" element={<PeopleTable users={users} fetchUsers={fetchUsers} />} />
           </Routes>
         </div>

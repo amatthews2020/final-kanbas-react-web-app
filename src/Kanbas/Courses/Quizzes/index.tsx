@@ -13,7 +13,10 @@ import { setQuizzes, updateQuiz, deleteQuiz } from "./reducer";
 import { GoCircleSlash } from "react-icons/go";
 import GreenCheckmark from "../Modules/GreenCheckmark";
 import * as quizzesClient from "./client"
+import * as attemptsClient from "./Attempt/client"
 import QuizControlButton from "./QuizControlButton";
+import { setAttempts } from "./Attempt/reducer";
+
 
 
 
@@ -21,13 +24,22 @@ export default function Quizzes() {
   const { cid, qid } = useParams();
   const { quizzes } = useSelector((state: any) => state.quizzesReducer);
   const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const { attempts } = useSelector((state: any) => state.attemptsReducer);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const fetchQuizzes = async () => {
     const quizzes = await coursesClient.findQuizzesForCourse(cid as string);
-    console.log("Quizzes", quizzes);
+    // Students should only be able to see published quizzes
     dispatch(setQuizzes(quizzes));
   };
+
+  const fetchAttemptsForUser = async () => {
+    const rattempts = await attemptsClient.fetchAttemptForUser(currentUser._id);
+    console.log("rattempts", rattempts)
+    dispatch(setAttempts(rattempts))
+    console.log("dispatcher", attempts)
+  }
 
   //Delete quiz
   const removeQuiz = async (quizId: string) => {
@@ -35,11 +47,33 @@ export default function Quizzes() {
     dispatch(deleteQuiz(quizId));
   }
 
-  const upQuiz = async (quiz: any) => {
-    console.log("updating the quiz" + quiz);
+  const upQuiz = async (quiz_id: any) => {
+    navigate(`/Kanbas/Courses/${cid}/Quizzes/${quiz_id}/Editor`);
   }
 
+  // Get the number of correct answers for a quiz attempt
+  const getCorrectAnswerCount = (quizId: string) => {
+
+    if (attempts) {
+      const attempt = attempts.find((attempt: any) => attempt.quiz === quizId && attempt.user === currentUser._id);
+      console.log("Here", attempt)
+      if (attempt) {
+        
+        const correct = attempt.answers.filter((answer: any) => answer.isCorrect).length;
+        const total = attempt.answers.length;
+        console.log("Here2", {correct, total})
+        if (correct && total) {
+          return {correct, total}
+        } else if (total) {
+          return {correct: 0, total}
+        }
+      }
+    }
+    return {correct: 0, total: 0};
+  };
+
   useEffect(() => {
+    fetchAttemptsForUser();
     fetchQuizzes();
   }, []);
 
@@ -97,7 +131,7 @@ export default function Quizzes() {
                   <RxRocket className="me-2 fs-3 float-start mt-4 mx-2 text-success" />
                   <div className="float-start">
                     <a className="wd-assignment-link text-decoration-none text-dark fs-4 "
-                      href={`#/Kanbas/Courses/${cid}/Quizzes/${currentUser.role === "FACULTY" ? quiz._id : ""}`}>
+                      href={`#/Kanbas/Courses/${cid}/Quizzes/${currentUser.role === "FACULTY" ? quiz._id : `${quiz._id}/Attempt`}`}>
                       {quiz.title}
                     </a> <br />
                     <span className="fs-6 ">
@@ -105,13 +139,28 @@ export default function Quizzes() {
                       <b> Due </b> {quiz.due} | {quiz.points} Points
                     </span>
                   </div>
-                  <QuizControlButton
-                    quiz={quiz}
-                    togglePublish={togglePublish}
-                    deleteQuiz={removeQuiz}
-                    editQuiz={upQuiz} />
+                  {currentUser.role === "FACULTY" &&
+                    <QuizControlButton
+                      quiz={quiz}
+                      togglePublish={togglePublish}
+                      deleteQuiz={removeQuiz}
+                      editQuiz={upQuiz} />
+                  }
+                  {currentUser.role === "STUDENT" &&
+                    <div className="float-end mt-3  mx-3 fs-4">
+                      {getCorrectAnswerCount(quiz._id).total > 0 ? (
+                        <span className="fs-6 text-muted">
+                          {" "}
+                          Score: {getCorrectAnswerCount(quiz._id).correct} / {getCorrectAnswerCount(quiz._id).total}
+                        </span>
+                      ) : (
+                        <span className="fs-6 text-muted"> No Attempt Yet</span>
+                      )}
+                    </div>
+                  }
 
                 </li>
+
 
               )}
           </ul>

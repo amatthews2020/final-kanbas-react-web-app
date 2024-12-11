@@ -1,6 +1,22 @@
 
 
-export default function MultipleChoiceQuestion({ question }: { question: any }) {
+export default function MultipleChoiceQuestion({ 
+  question, 
+  onAnswer,
+  taking,
+  userAnswer, } : 
+  { question: any, 
+    onAnswer?: (questionId: string, answer: string) => void,
+    taking?: boolean; // Optional flag to check if the user is taking the quiz
+    userAnswer?: string; }) {
+
+    const handleAnswerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (onAnswer) {
+        onAnswer(question._id, e.target.value);
+      }
+    };
+
+    const isCorrect = userAnswer === question.answer;
     return (
         <div
           className="d-flex justify-content-center align-items-center "        >
@@ -15,6 +31,11 @@ export default function MultipleChoiceQuestion({ question }: { question: any }) 
             >
               <h5 className="card-title mb-0">{question.title}</h5>
               <span className="">{question.points} pts</span>
+              {!taking && (
+                        <span className={`text-${isCorrect ? "success" : "danger"}`}>
+                            {isCorrect ? "Correct" : "Incorrect"}
+                        </span>
+                    )}
             </div>
     
             <div className="card-body">
@@ -30,11 +51,14 @@ export default function MultipleChoiceQuestion({ question }: { question: any }) 
                     <hr />
                     
                     <input
-                        className="form-check-input"
-                        type="radio"
-                        name={`question-${question._id}`}
-                        id={`${choice}-${question._id}`}
-                        value={choice}
+                      className="form-check-input"
+                      type="radio"
+                      name={`question-${question._id}`}
+                      id={`${choice}-${question._id}`}
+                      value={choice}
+                      onChange={handleAnswerChange}
+                      checked={userAnswer === choice} // Mark the selected answer
+                      disabled={!taking} // Disable the radio buttons if not taking
                     />
                     <label className="form-check-label" htmlFor={`${choice}-${question._id}`}>
                         {choice}

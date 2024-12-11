@@ -4,16 +4,15 @@ export default function FillInBlankQuestion({
     taking,
     userAnswer, } : 
     { question: any, 
-      onAnswer?: (questionId: string, answer: string) => void,
+      onAnswer?: (questionId: string, answer: string, points: number) => void,
       taking?: boolean; // Optional flag to check if the user is taking the quiz
       userAnswer?: string; }) {
 
     const handleAnswerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (onAnswer) {
-            onAnswer(question._id, e.target.value);
+            onAnswer(question._id, e.target.value, question.points);
         }
     };
-    
 
     const isCorrect = userAnswer === question.answer;
 
@@ -47,7 +46,7 @@ export default function FillInBlankQuestion({
                             type="text"
                             className="form-control d-inline w-auto"
                             style={{ width: "120px", display: "inline" }}
-                            defaultValue={userAnswer || ""} // If not taking, show the user's answer
+                            defaultValue={taking ? "" : userAnswer || ""} // If not taking, show the user's answer
                             onChange={handleAnswerChange}
                             disabled={!taking} // Disable input if not taking
                         />

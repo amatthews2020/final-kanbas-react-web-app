@@ -32,7 +32,7 @@ export default function QuizPreview() {
         }
     };
 
-    const handleAnswerChange = (questionId: string, answer: string) => {
+    const handleAnswerChange = (questionId: string, answer: string, points: number) => {
         setAnswers((prevAnswers) => {
             const question = questions.find((q: any) => q._id === questionId); // Find the corresponding question
             const isCorrect = question ? question.answer === answer : false; // Check if the answer is correct
@@ -41,11 +41,11 @@ export default function QuizPreview() {
             if (existing) {
               // Update existing answer
               return prevAnswers.map((ans) =>
-                ans.questionId === questionId ? { ...ans, answer, isCorrect } : ans
+                ans.questionId === questionId ? { ...ans, answer, isCorrect, points } : ans
               );
             } else {
               // Add new answer
-              return [...prevAnswers, { questionId, answer, isCorrect, attempt: 0 }];
+              return [...prevAnswers, { questionId, answer, isCorrect, points }];
             }
           });
     };
@@ -238,5 +238,6 @@ export default function QuizPreview() {
             </div>
         </div>
     );
+
 
 }

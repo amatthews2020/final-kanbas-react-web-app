@@ -6,13 +6,13 @@ export default function MultipleChoiceQuestion({
   taking,
   userAnswer, } : 
   { question: any, 
-    onAnswer?: (questionId: string, answer: string) => void,
+    onAnswer?: (questionId: string, answer: string, points: number) => void,
     taking?: boolean; // Optional flag to check if the user is taking the quiz
     userAnswer?: string; }) {
 
     const handleAnswerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       if (onAnswer) {
-        onAnswer(question._id, e.target.value);
+        onAnswer(question._id, e.target.value, question.points);
       }
     };
 

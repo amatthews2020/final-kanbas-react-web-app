@@ -53,23 +53,25 @@ export default function Quizzes() {
 
   // Get the number of correct answers for a quiz attempt
   const getCorrectAnswerCount = (quizId: string) => {
-
     if (attempts) {
       const attempt = attempts.find((attempt: any) => attempt.quiz === quizId && attempt.user === currentUser._id);
-      console.log("Here", attempt)
+  
       if (attempt) {
-        
-        const correct = attempt.answers.filter((answer: any) => answer.isCorrect).length;
-        const total = attempt.answers.length;
-        console.log("Here2", {correct, total})
-        if (correct && total) {
-          return {correct, total}
-        } else if (total) {
-          return {correct: 0, total}
+        if (Array.isArray(attempt.answers) && attempt.answers.length > 0) {
+          // Sum points for all correct answers using answer.points
+          const correctPoints = attempt.answers
+            .filter((answer: any) => answer.isCorrect) // Filter correct answers
+            .reduce((total: number, answer: any) => {
+              // Add the answer's points if it exists
+              return total + (answer.points || 0);
+            }, 0);
+  
+          return correctPoints; // Return the total points for correct answers
         }
       }
     }
-    return {correct: 0, total: 0};
+  
+    return -1; // Return -1 if no attempt or quiz data
   };
 
   useEffect(() => {
@@ -146,18 +148,18 @@ export default function Quizzes() {
                       deleteQuiz={removeQuiz}
                       editQuiz={upQuiz} />
                   }
-                  {currentUser.role === "STUDENT" &&
-                    <div className="float-end mt-3  mx-3 fs-4">
-                      {getCorrectAnswerCount(quiz._id).total > 0 ? (
+                  {currentUser.role === "STUDENT" && (
+                    <div className="float-end mt-3 mx-3 fs-4">
+                      {getCorrectAnswerCount(quiz._id) >= 0 ? (
                         <span className="fs-6 text-muted">
                           {" "}
-                          Score: {getCorrectAnswerCount(quiz._id).correct} / {getCorrectAnswerCount(quiz._id).total}
+                          Score: {getCorrectAnswerCount(quiz._id)} / {quiz.points}
                         </span>
                       ) : (
                         <span className="fs-6 text-muted"> No Attempt Yet</span>
                       )}
                     </div>
-                  }
+                  )}
 
                 </li>
 

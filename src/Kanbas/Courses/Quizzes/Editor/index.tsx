@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes } from "react-router";
 import QuizEditor from "./QuizEditor";
-import Questions from "./Questions";
+import Questions from "./QuizQuestionsEditor";
 import Details from "./Details";
 
 

@@ -32,6 +32,7 @@ export default function Quizzes() {
     const quizzes = await coursesClient.findQuizzesForCourse(cid as string);
     // Students should only be able to see published quizzes
     dispatch(setQuizzes(quizzes));
+    console.log("Reducer from Quiz", quizzes)
   };
 
   const fetchAttemptsForUser = async () => {
@@ -48,14 +49,14 @@ export default function Quizzes() {
   }
 
   const upQuiz = async (quiz_id: any) => {
-    navigate(`/Kanbas/Courses/${cid}/Quizzes/${quiz_id}/Editor`);
+    navigate(`/Kanbas/Courses/${cid}/Quizzes/${quiz_id}/Edit`);
   }
 
   // Get the number of correct answers for a quiz attempt
   const getCorrectAnswerCount = (quizId: string) => {
     if (attempts) {
       const attempt = attempts.find((attempt: any) => attempt.quiz === quizId && attempt.user === currentUser._id);
-  
+
       if (attempt) {
         if (Array.isArray(attempt.answers) && attempt.answers.length > 0) {
           // Sum points for all correct answers using answer.points
@@ -65,12 +66,12 @@ export default function Quizzes() {
               // Add the answer's points if it exists
               return total + (answer.points || 0);
             }, 0);
-  
+
           return correctPoints; // Return the total points for correct answers
         }
       }
     }
-  
+
     return -1; // Return -1 if no attempt or quiz data
   };
 

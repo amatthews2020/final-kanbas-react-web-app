@@ -15,6 +15,7 @@ import QuizPreview from "./Quizzes/Preview";
 import QuizEditor from "./Quizzes/Editor/QuizEditor";
 import EditorIndex from "./Quizzes/Editor";
 import { useSelector } from "react-redux";
+import QuizQuestionsEditor from "./Quizzes/Editor/QuizQuestionsEditor";
 
 export default function Courses({ courses }: { courses: any[]; }) {
   const { cid } = useParams();
@@ -28,7 +29,7 @@ export default function Courses({ courses }: { courses: any[]; }) {
       setUsers(users);
     }
   };
-  
+
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -55,7 +56,9 @@ export default function Courses({ courses }: { courses: any[]; }) {
             <Route path="Assignments/:aid" element={<AssignmentEditor />} />
             <Route path="Quizzes" element={<Quizzes />} />
             <Route path="Quizzes/:qid" element={<QuizDetails />} />
-            <Route path="Quizzes/:qid/Editor/*" element={<EditorIndex />} />
+            <Route path="Quizzes/:qid/Questions" element={<QuizQuestionsEditor />} />
+            <Route path="Quizzes/:qid/Edit" element={<QuizEditor />} />
+            <Route path="Quizzes/New/Editor" element={<QuizEditor />} />
             <Route path="Quizzes/:qid/Preview" element={<QuizPreview />} />
             <Route path="Quizzes/:qid/Attempt" element={<QuizPreview />} />
             <Route path="People" element={<PeopleTable users={users} fetchUsers={fetchUsers} />} />

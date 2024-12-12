@@ -1,7 +1,6 @@
-import { Navigate, Route, Routes } from "react-router";
+import { Navigate, Route, Routes, } from "react-router";
 import QuizEditor from "./QuizEditor";
-import Questions from "./Questions";
-import Details from "./Details";
+import Questions from "./QuizQuestionsEditor";
 
 
 export default function EditorIndex() {
@@ -12,7 +11,7 @@ export default function EditorIndex() {
             </div>
             <Routes>
                 <Route path="/" element={<Navigate to="Details" />} />
-                <Route path="/Details" element={<Details />} />
+                <Route path="/Edit" element={<QuizEditor />} />
                 <Route path="/Questions" element={<Questions />} />
             </Routes>
         </div>

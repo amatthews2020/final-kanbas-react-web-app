@@ -1,5 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { group } from "console";
 const initialState = {
   quizzes: [],
 };
@@ -21,8 +20,11 @@ const quizzesSlice = createSlice({
         due: quiz.due,
         available: quiz.available,
         published: quiz.published,
+        until: quiz.until,
         type: quiz.type,
         group: quiz.group,
+        access_code_enabled: quiz.access_code_enabled,
+        access_code: quiz.access_code,
         shuffle: quiz.shuffle,
         time_limit: quiz.time_limit,
         multiple_attempts: quiz.multiple_attempts,

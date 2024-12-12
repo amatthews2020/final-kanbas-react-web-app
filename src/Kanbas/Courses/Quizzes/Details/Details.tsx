@@ -8,6 +8,7 @@ export default function QuizDetails() {
     console.log("Quiz ID", qid);
     const [quiz, setQuiz] = useState<any>({});
     const { quizzes } = useSelector((state: any) => state.quizzesReducer);
+    console.log("Quizzes from details", quizzes);
 
 
     useEffect(() => {
@@ -24,7 +25,7 @@ export default function QuizDetails() {
         <div className="container">
             <div className="row wd-full-width">
                 <div>
-                    <DetailHeaderButtons path={`/Kanbas/Courses/${cid}/Quizzes/${qid}/Preview`}/>
+                    <DetailHeaderButtons path={`/Kanbas/Courses/${cid}/Quizzes/${qid}/Preview`} />
                 </div>
             </div>
             <hr />

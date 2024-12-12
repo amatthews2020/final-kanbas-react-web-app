@@ -12,6 +12,7 @@ export default function QuizEditor() {
   const dispatch = useDispatch();
   const quizzes = useSelector((state: any) => state.quizzesReducer.quizzes);
 
+
   const defaultQuizData = {
     _id: "New",
     title: "",

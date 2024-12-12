@@ -230,7 +230,7 @@ export default function QuizPreview() {
                                 style={{ cursor: "pointer" }}
                                 onClick={() => handleQuestionTitleClick(index)}
                             >
-                                {question.title}
+                                Question {index + 1}
                             </li>
                         );
                     })}

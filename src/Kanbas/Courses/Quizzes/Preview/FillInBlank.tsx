@@ -2,11 +2,13 @@ export default function FillInBlankQuestion({
     question, 
     onAnswer,
     taking,
-    userAnswer, } : 
+    userAnswer,
+    questionIndex, } : 
     { question: any, 
       onAnswer?: (questionId: string, answer: string, points: number) => void,
       taking?: boolean; // Optional flag to check if the user is taking the quiz
-      userAnswer?: string; }) {
+      userAnswer?: string;
+    questionIndex?: any  }) {
 
     const handleAnswerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (onAnswer) {

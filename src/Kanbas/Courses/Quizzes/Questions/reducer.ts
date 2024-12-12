@@ -12,6 +12,7 @@ const questionsSlice = createSlice({
     },
     addQuestion: (state, { payload: question }) => {
       const newQuestion: any = {
+        // Need to add some fields
         _id: new Date().getTime().toString(),
         title: question.title,
         quiz: question.quiz,

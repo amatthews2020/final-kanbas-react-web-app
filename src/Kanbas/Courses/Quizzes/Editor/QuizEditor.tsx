@@ -16,23 +16,26 @@ export default function QuizEditor() {
   const defaultQuizData = {
     _id: "New",
     title: "",
-    description: "",
+    course: cid,
+    desc: "",
     points: 0,
-    availableDate: "",
-    dueDate: "",
-    untilDate: "",
-    accessCodeBool: false,
-    accessCode: "",
+    available: "",
+    due: "",
+    until: "",
+    access_code_enabled: false,
+    access_code: "",
     type: "Graded Quiz",
-    multipleAttempts: false,
-    allowedAttempts: 3,
-    shuffleAnswers: true,
-    timeLimit: 20,
-    assignmentGroup: "Quizzes",
-    webcamRequired: false,
-    lockQuestionsAfterAnswering: false,
-    oneQuestionPerPage: true,
-    showCorrectAnswers: false,
+    multiple_attempts: false,
+    attempts: 3,
+    shuffle_answers: true,
+    time_limit: 20,
+    group: "Quizzes",
+    webcam: false,
+    lock_questions_after_answering: false,
+    one_question_at_a_time: true,
+    show_correct_answers: false,
+    view_responses: true,
+    required_to_view: false,
   };
 
   const [quiz, setLocalQuiz] = useState(
@@ -128,8 +131,8 @@ export default function QuizEditor() {
           id="quiz-description"
           className="form-control"
           rows={5}
-          value={quiz.description}
-          onChange={(e) => handleChange("description", e.target.value)}
+          value={quiz.desc}
+          onChange={(e) => handleChange("desc", e.target.value)}
         />
       </div>
 
@@ -192,9 +195,9 @@ export default function QuizEditor() {
                   <select
                     id="quiz-assignment-group"
                     className="form-control"
-                    value={quiz.assignmentGroup}
+                    value={quiz.group}
                     onChange={(e) =>
-                      handleChange("assignmentGroup", e.target.value)
+                      handleChange("group", e.target.value)
                     }
                   >
                     <option value="Quizzes">Quizzes</option>
@@ -219,9 +222,9 @@ export default function QuizEditor() {
                     min={1}
                     type="number"
                     className="form-control"
-                    defaultValue={quiz.timeLimit}
+                    defaultValue={quiz.time_limit}
                     onChange={(e) =>
-                      handleChange("timeLimit", parseInt(e.target.value))
+                      handleChange("time_limit", parseInt(e.target.value))
                     }
                   ></input>
                 </div>
@@ -240,9 +243,9 @@ export default function QuizEditor() {
                     type="checkbox"
                     id="quiz-shuffle-answers"
                     className="form-check-input ms-2"
-                    checked={quiz.shuffleAnswers}
+                    checked={quiz.shuffle_answers}
                     onChange={(e) =>
-                      handleChange("shuffleAnswers", e.target.checked)
+                      handleChange("shuffle_answers", e.target.checked)
                     }
                   />
                 </div>
@@ -263,9 +266,9 @@ export default function QuizEditor() {
                     id="quiz-multiple-attempts"
                     type="checkbox"
                     className="form-check-input ms-2"
-                    checked={quiz.multipleAttempts}
+                    checked={quiz.multiple_attempts}
                     onChange={(e) =>
-                      handleChange("multipleAttempts", e.target.checked)
+                      handleChange("multiple_attempts", e.target.checked)
                     }
                   />
                 </div>
@@ -288,10 +291,10 @@ export default function QuizEditor() {
                       type="number"
                       min={1}
                       className="form-control ms-2"
-                      value={quiz.allowedAttempts}
+                      value={quiz.attempts}
                       onChange={(e) =>
                         handleChange(
-                          "allowedAttempts",
+                          "attempts",
                           parseInt(e.target.value)
                         )
                       }
@@ -315,9 +318,9 @@ export default function QuizEditor() {
                     id="quiz-show-correct-answers"
                     type="checkbox"
                     className="form-check-input ms-2"
-                    checked={quiz.showCorrectAnswers}
+                    checked={quiz.show_correct_answers}
                     onChange={(e) =>
-                      handleChange("showCorrectAnswers", e.target.checked)
+                      handleChange("show_correct_answers", e.target.checked)
                     }
                   />
                 </div>
@@ -338,9 +341,9 @@ export default function QuizEditor() {
                     type="checkbox"
                     id="quiz-access-code-required"
                     className="form-check-input ms-2"
-                    checked={quiz.accessCodeBool}
+                    checked={quiz.access_code_enabled}
                     onChange={(e) =>
-                      handleChange("accessCodeBool", e.target.checked)
+                      handleChange("access_code_enabled", e.target.checked)
                     }
                   />
                 </div>
@@ -360,9 +363,9 @@ export default function QuizEditor() {
                       type="text"
                       id="quiz-access-code"
                       className="form-control ms-2"
-                      value={quiz.accessCode}
+                      value={quiz.access_code}
                       onChange={(e) =>
-                        handleChange("accessCode", e.target.value)
+                        handleChange("access_code", e.target.value)
                       }
                     />
                   </div>
@@ -384,9 +387,9 @@ export default function QuizEditor() {
                     id="quiz-one-question-per-page"
                     type="checkbox"
                     className="form-check-input ms-2"
-                    checked={quiz.oneQuestionPerPage}
+                    checked={quiz.one_question_at_a_time}
                     onChange={(e) =>
-                      handleChange("oneQuestionPerPage", e.target.checked)
+                      handleChange("one_question_at_a_time", e.target.checked)
                     }
                   />
                 </div>
@@ -405,9 +408,9 @@ export default function QuizEditor() {
                     id="quiz-webcam-required"
                     type="checkbox"
                     className="form-check-input ms-2"
-                    checked={quiz.webcamRequired}
+                    checked={quiz.webcam}
                     onChange={(e) =>
-                      handleChange("webcamRequired", e.target.checked)
+                      handleChange("webcam", e.target.checked)
                     }
                   />
                 </div>
@@ -429,10 +432,10 @@ export default function QuizEditor() {
                     id="quiz-lock-questions"
                     type="checkbox"
                     className="form-check-input ms-2"
-                    checked={quiz.lockQuestionsAfterAnswering}
+                    checked={quiz.lock_questions_after_answering}
                     onChange={(e) =>
                       handleChange(
-                        "lockQuestionsAfterAnswering",
+                        "lock_questions_after_answering",
                         e.target.checked
                       )
                     }
@@ -453,9 +456,9 @@ export default function QuizEditor() {
                     type="date"
                     id="quiz-available-date"
                     className="form-control"
-                    value={(quiz.availableDate ?? "").split("T")[0]}
+                    value={(quiz.available ?? "").split("T")[0]}
                     onChange={(e) =>
-                      handleChange("availableDate", e.target.value)
+                      handleChange("available", e.target.value)
                     }
                   />
                 </div>
@@ -474,8 +477,8 @@ export default function QuizEditor() {
                     type="date"
                     id="quiz-due-date"
                     className="form-control"
-                    value={(quiz.dueDate ?? "").split("T")[0]}
-                    onChange={(e) => handleChange("dueDate", e.target.value)}
+                    value={(quiz.due ?? "").split("T")[0]}
+                    onChange={(e) => handleChange("due", e.target.value)}
                   />
                 </div>
               </div>
@@ -493,8 +496,8 @@ export default function QuizEditor() {
                     type="date"
                     id="quiz-until-date"
                     className="form-control"
-                    value={(quiz.untilDate ?? "").split("T")[0]}
-                    onChange={(e) => handleChange("untilDate", e.target.value)}
+                    value={(quiz.until ?? "").split("T")[0]}
+                    onChange={(e) => handleChange("until", e.target.value)}
                   />
                 </div>
               </div>

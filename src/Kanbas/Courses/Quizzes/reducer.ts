@@ -1,6 +1,4 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { group } from "console";
-import { access } from "fs";
 const initialState = {
   quizzes: [],
 };

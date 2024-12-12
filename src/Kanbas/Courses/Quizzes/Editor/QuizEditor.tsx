@@ -10,8 +10,8 @@ export default function QuizEditor() {
   const { cid, qid } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const quizzes = useSelector((state: any) => state.quizzesReducer.quizzes);
-
+  const { quizzes } = useSelector((state: any) => state.quizzesReducer);
+  console.log("Quizzes From Editor", quizzes);
 
   const defaultQuizData = {
     _id: "New",
@@ -27,6 +27,7 @@ export default function QuizEditor() {
     type: "Graded Quiz",
     multiple_attempts: false,
     attempts: 3,
+    published: false,
     shuffle_answers: true,
     time_limit: 20,
     group: "Quizzes",
@@ -38,25 +39,9 @@ export default function QuizEditor() {
     required_to_view: false,
   };
 
-  const [quiz, setLocalQuiz] = useState(
+  const [localQuiz, setLocalQuiz] = useState(
     quizzes.find((q: any) => q._id === qid) || { ...defaultQuizData }
   );
-
-  const handleSave = async (publish: boolean) => {
-    const toSave = { ...quiz, publish: publish };
-    if (!qid || qid === "New") {
-      await coursesClient.createQuizzesForCourse(cid as string, toSave);
-      dispatch(addQuiz({ ...toSave, course: cid }));
-    } else {
-      await quizzClient.updateQuiz(toSave);
-      dispatch(updateQuiz({ ...toSave, _id: qid, course: cid }));
-    }
-    navigate(`/Kanbas/Courses/${cid}/Quizzes`);
-  };
-
-  const handleChange = (field: string, value: string | number | boolean) => {
-    setLocalQuiz({ ...quiz, [field]: value });
-  };
 
   const fetchQuiz = async () => {
     const quiz = await coursesClient.findQuizzesForCourse(cid as string);
@@ -70,6 +55,24 @@ export default function QuizEditor() {
       fetchQuiz();
     }
   }, [qid]);
+
+  const handleSave = async (publish: boolean) => {
+    const toSave = { ...localQuiz, published: publish };
+    if (!qid || qid === "New") {
+      await coursesClient.createQuizzesForCourse(cid as string, toSave);
+      dispatch(addQuiz({ ...toSave, course: cid }));
+    } else {
+      await quizzClient.updateQuiz(toSave);
+      dispatch(updateQuiz({ ...toSave, _id: qid, course: cid }));
+    }
+    navigate(`/Kanbas/Courses/${cid}/Quizzes`);
+  };
+
+  const handleChange = (field: string, value: string | number | boolean) => {
+    setLocalQuiz({ ...localQuiz, [field]: value });
+  };
+
+
 
   return (
     <div id="quiz-editor" className="container mt-4">
@@ -92,9 +95,9 @@ export default function QuizEditor() {
           className="tab"
           onClick={() => {
             if (qid === "New") {
-              dispatch(addQuiz(quiz));
+              dispatch(addQuiz(localQuiz));
             }
-            dispatch(updateQuiz(quiz));
+            dispatch(updateQuiz(localQuiz));
             navigate(
               `/Kanbas/Courses/${cid}/Quizzes/${qid ?? "New"}/Questions`
             );
@@ -118,7 +121,7 @@ export default function QuizEditor() {
           type="text"
           id="quiz-title"
           className="form-control"
-          value={quiz.title}
+          value={localQuiz.title}
           onChange={(e) => handleChange("title", e.target.value)}
         />
       </div>
@@ -131,7 +134,7 @@ export default function QuizEditor() {
           id="quiz-description"
           className="form-control"
           rows={5}
-          value={quiz.desc}
+          value={localQuiz.desc}
           onChange={(e) => handleChange("desc", e.target.value)}
         />
       </div>
@@ -149,7 +152,7 @@ export default function QuizEditor() {
                     type="number"
                     id="quiz-points"
                     className="form-control"
-                    value={quiz.points}
+                    value={localQuiz.points}
                     onChange={(e) =>
                       handleChange("points", Number(e.target.value))
                     }
@@ -170,7 +173,7 @@ export default function QuizEditor() {
                   <select
                     id="quiz-type"
                     className="form-control"
-                    value={quiz.type}
+                    value={localQuiz.type}
                     onChange={(e) => handleChange("type", e.target.value)}
                   >
                     <option value="Graded Quiz">Graded Quiz</option>
@@ -195,7 +198,7 @@ export default function QuizEditor() {
                   <select
                     id="quiz-assignment-group"
                     className="form-control"
-                    value={quiz.group}
+                    value={localQuiz.group}
                     onChange={(e) =>
                       handleChange("group", e.target.value)
                     }
@@ -222,7 +225,7 @@ export default function QuizEditor() {
                     min={1}
                     type="number"
                     className="form-control"
-                    defaultValue={quiz.time_limit}
+                    defaultValue={localQuiz.time_limit}
                     onChange={(e) =>
                       handleChange("time_limit", parseInt(e.target.value))
                     }
@@ -243,7 +246,7 @@ export default function QuizEditor() {
                     type="checkbox"
                     id="quiz-shuffle-answers"
                     className="form-check-input ms-2"
-                    checked={quiz.shuffle_answers}
+                    checked={localQuiz.shuffle_answers}
                     onChange={(e) =>
                       handleChange("shuffle_answers", e.target.checked)
                     }
@@ -266,7 +269,7 @@ export default function QuizEditor() {
                     id="quiz-multiple-attempts"
                     type="checkbox"
                     className="form-check-input ms-2"
-                    checked={quiz.multiple_attempts}
+                    checked={localQuiz.multiple_attempts}
                     onChange={(e) =>
                       handleChange("multiple_attempts", e.target.checked)
                     }
@@ -276,7 +279,7 @@ export default function QuizEditor() {
             </td>
           </tr>
 
-          {quiz.multipleAttempts && (
+          {localQuiz.multiple_attempts && (
             <tr className="mb-3">
               <td>
                 <div className="row align-items-center">
@@ -291,7 +294,7 @@ export default function QuizEditor() {
                       type="number"
                       min={1}
                       className="form-control ms-2"
-                      value={quiz.attempts}
+                      value={localQuiz.attempts}
                       onChange={(e) =>
                         handleChange(
                           "attempts",
@@ -318,7 +321,7 @@ export default function QuizEditor() {
                     id="quiz-show-correct-answers"
                     type="checkbox"
                     className="form-check-input ms-2"
-                    checked={quiz.show_correct_answers}
+                    checked={localQuiz.show_correct_answers}
                     onChange={(e) =>
                       handleChange("show_correct_answers", e.target.checked)
                     }
@@ -341,7 +344,7 @@ export default function QuizEditor() {
                     type="checkbox"
                     id="quiz-access-code-required"
                     className="form-check-input ms-2"
-                    checked={quiz.access_code_enabled}
+                    checked={localQuiz.access_code_enabled}
                     onChange={(e) =>
                       handleChange("access_code_enabled", e.target.checked)
                     }
@@ -351,7 +354,7 @@ export default function QuizEditor() {
             </td>
           </tr>
 
-          {quiz.accessCodeBool && (
+          {localQuiz.access_code_enabled && (
             <tr className="mb-3">
               <td>
                 <div className="row align-items-center">
@@ -363,7 +366,7 @@ export default function QuizEditor() {
                       type="text"
                       id="quiz-access-code"
                       className="form-control ms-2"
-                      value={quiz.access_code}
+                      value={localQuiz.access_code}
                       onChange={(e) =>
                         handleChange("access_code", e.target.value)
                       }
@@ -387,7 +390,7 @@ export default function QuizEditor() {
                     id="quiz-one-question-per-page"
                     type="checkbox"
                     className="form-check-input ms-2"
-                    checked={quiz.one_question_at_a_time}
+                    checked={localQuiz.one_question_at_a_time}
                     onChange={(e) =>
                       handleChange("one_question_at_a_time", e.target.checked)
                     }
@@ -408,7 +411,7 @@ export default function QuizEditor() {
                     id="quiz-webcam-required"
                     type="checkbox"
                     className="form-check-input ms-2"
-                    checked={quiz.webcam}
+                    checked={localQuiz.webcam}
                     onChange={(e) =>
                       handleChange("webcam", e.target.checked)
                     }
@@ -432,7 +435,7 @@ export default function QuizEditor() {
                     id="quiz-lock-questions"
                     type="checkbox"
                     className="form-check-input ms-2"
-                    checked={quiz.lock_questions_after_answering}
+                    checked={localQuiz.lock_questions_after_answering}
                     onChange={(e) =>
                       handleChange(
                         "lock_questions_after_answering",
@@ -456,7 +459,7 @@ export default function QuizEditor() {
                     type="date"
                     id="quiz-available-date"
                     className="form-control"
-                    value={(quiz.available ?? "").split("T")[0]}
+                    value={(localQuiz.available ?? "").split("T")[0]}
                     onChange={(e) =>
                       handleChange("available", e.target.value)
                     }
@@ -477,7 +480,7 @@ export default function QuizEditor() {
                     type="date"
                     id="quiz-due-date"
                     className="form-control"
-                    value={(quiz.due ?? "").split("T")[0]}
+                    value={(localQuiz.due ?? "").split("T")[0]}
                     onChange={(e) => handleChange("due", e.target.value)}
                   />
                 </div>
@@ -496,7 +499,7 @@ export default function QuizEditor() {
                     type="date"
                     id="quiz-until-date"
                     className="form-control"
-                    value={(quiz.until ?? "").split("T")[0]}
+                    value={(localQuiz.until ?? "").split("T")[0]}
                     onChange={(e) => handleChange("until", e.target.value)}
                   />
                 </div>
@@ -517,7 +520,7 @@ export default function QuizEditor() {
             Cancel
           </Link>
           <button
-            onClick={() => handleSave(quiz.publish ?? false)}
+            onClick={() => handleSave(localQuiz.published ?? false)}
             className="btn btn-danger me-3"
           >
             Save

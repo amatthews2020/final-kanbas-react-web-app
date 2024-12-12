@@ -9,6 +9,8 @@ import { setQuizzes, updateQuiz } from "../reducer";
 import FillInTheBlankContent from "./FillInTheBlankContent";
 import MultipleChoiceContent from "./MultipleChoiceContent";
 import TrueFalseContent from "./TrueFalseContent";
+import * as quizzesClient from "../client";
+import { get } from "http";
 
 // Define types for each QuizQuestion type
 export declare type TrueFalseQuestionContent = {
@@ -18,7 +20,8 @@ export declare type TrueFalseQuestionContent = {
 };
 
 export declare type TrueFalseQuestion = {
-  _id: number;
+  _id: string;
+  sequence: number;
   type: "TRUEFALSE";
   content: TrueFalseQuestionContent;
 };
@@ -31,7 +34,8 @@ export declare type MultipleChoiceQuestionContent = {
 };
 
 export declare type MultipleChoiceQuestion = {
-  _id: number;
+  _id: string;
+  sequence: number;
   type: "MULTIPLECHOICE";
   content: MultipleChoiceQuestionContent;
 };
@@ -44,7 +48,8 @@ export declare type FillInTheBlankQuestionContent = {
 };
 
 export declare type FillInTheBlankQuestion = {
-  _id: number;
+  _id: string;
+  sequence: number;
   type: "FILLINTHEBLANK";
   content: FillInTheBlankQuestionContent;
 };
@@ -69,9 +74,7 @@ export default function Questions() {
   );
 
   // Use local state to manage temporary QuizQuestion changes
-  const [questions, setQuestions] = useState<QuizQuestion[]>(
-    quiz?.questions || []
-  );
+  const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [points, setPoints] = useState(quiz?.points || 0);
   const [showTypeModal, setShowTypeModal] = useState(false);
   const [selectedType, setSelectedType] = useState<string | null>(null);
@@ -103,10 +106,76 @@ export default function Questions() {
     setFitbContent({ ...fitbDefault });
   };
 
+  const translateFromDB = (question: any) => {
+    let newQuestion: QuizQuestion;
+    let fitbq: FillInTheBlankQuestionContent;
+    let tf: TrueFalseQuestionContent;
+    let mc: MultipleChoiceQuestionContent;
+
+    if (question.type === "True False") {
+      tf = {
+        text: question.question,
+        answer: question.answer,
+        point: question.points,
+      };
+      newQuestion = {
+        _id: question._id,
+        sequence: questions.length + 1,
+        type: "TRUEFALSE",
+        content: tf
+      };
+    } else if (question.type === "Multiple Choice") {
+
+      mc = {
+        text: question.question,
+        choices: question.choices,
+        answer: question.answer,
+        point: question.points,
+      };
+      newQuestion = {
+        _id: question._id,
+        sequence: questions.length + 1,
+        type: "MULTIPLECHOICE",
+        content: mc,
+      };
+    } else {
+      fitbq = {
+        text: question.question,
+        blanks: question.choices,
+        answer: question.answer,
+        point: question.points,
+      };
+      newQuestion = {
+        _id: question._id,
+        sequence: questions.length + 1,
+        type: "FILLINTHEBLANK",
+        content: fitbq,
+      };
+    }
+    return newQuestion;
+  }
+
+  const getQuestionsForQuiz = async () => {
+    const db_questions = await quizzesClient.findQuestionsForQuiz(qid as string);
+    console.log("DB Questions", db_questions);
+    db_questions.forEach((question: any) => {
+      setQuestions((prev) => [...prev, translateFromDB(question)]);
+    })
+    console.log("Questions", questions);
+  }
+
+  useEffect(() => {
+    if (quiz) {
+      getQuestionsForQuiz();
+    }
+  }, [quiz]);
+
   useEffect(() => {
     const totalPoints = questions.reduce((sum, q) => sum + q.content.point, 0);
     setPoints(totalPoints);
   }, [questions]);
+
+
 
   useEffect(() => {
     dispatch(
@@ -131,6 +200,42 @@ export default function Questions() {
     setShowTypeModal(true);
   };
 
+  const TranslateAddForDB = (question: QuizQuestion) => {
+    if (question.type === "TRUEFALSE") {
+      return {
+        _id: new Date().getTime().toString(),
+        title: "Question " + question._id,
+        type: "True False",
+        quiz: qid,
+        points: question.content.point,
+        question: question.content.text,
+        answer: question.content.answer,
+        choices: ["True", "False"],
+      };
+    } else if (question.type === "MULTIPLECHOICE") {
+      return {
+        _id: new Date().getTime().toString(),
+        title: "Question" + question._id,
+        type: "Multiple Choice",
+        quiz: qid,
+        points: question.content.point,
+        question: question.content.text,
+        answer: question.content.answer,
+        choices: question.content.choices,
+      };
+    } else {
+      return {
+        _id: new Date().getTime().toString(),
+        title: "Question" + question._id,
+        type: "Fill in the Blank",
+        quiz: qid,
+        points: question.content.point,
+        question: question.content.text,
+        answer: question.content.answer,
+        choices: question.content.blanks,
+      };
+    }
+  }
   const handleDelete = (question: QuizQuestion) => {
     setQuestions(questions.filter((q) => q._id !== question._id));
   };
@@ -165,7 +270,8 @@ export default function Questions() {
 
     if (selectedType === "TRUEFALSE") {
       newQuestion = {
-        _id: questions.length + 1,
+        _id: new Date().getTime().toString(),
+        sequence: questions.length + 1,
         type: "TRUEFALSE",
         content: {
           ...tfContent,
@@ -174,7 +280,8 @@ export default function Questions() {
       };
     } else if (selectedType === "MULTIPLECHOICE") {
       newQuestion = {
-        _id: questions.length + 1,
+        _id: new Date().getTime().toString(),
+        sequence: questions.length + 1,
         type: "MULTIPLECHOICE",
         content: {
           ...mcContent,
@@ -183,7 +290,8 @@ export default function Questions() {
       };
     } else {
       newQuestion = {
-        _id: questions.length + 1,
+        _id: new Date().getTime().toString(),
+        sequence: questions.length + 1,
         type: "FILLINTHEBLANK",
         content: {
           ...fitbContent,
@@ -204,8 +312,16 @@ export default function Questions() {
     setShowConfigModal(false);
   };
 
+  const sendQuestion = async (question: any) => {
+    await quizzesClient.createQuestionForQuiz(qid as string, question);
+  }
+
   const saveQuizQuestions = () => {
-    dispatch(updateQuiz({ ...quiz, questions, points }));
+    questions.forEach((q) => {
+      sendQuestion(TranslateAddForDB(q));
+    });
+
+    dispatch(updateQuiz({ ...quiz, points }));
     navigate(`/Kanbas/Courses/${cid}/Quizzes/${qid}/Edit`);
   };
 
@@ -217,9 +333,10 @@ export default function Questions() {
 
   const fetchQuiz = async () => {
     const newquiz = await coursesClient.findQuizzesForCourse(cid as string);
+    console.log("New Quiz", newquiz);
     dispatch(setQuizzes(newquiz));
-    setQuestions(newquiz.find((q: any) => q._id == qid)?.questions || []);
   };
+
   useEffect(() => {
     if (quizzes.length === 0) {
       fetchQuiz();
@@ -227,6 +344,7 @@ export default function Questions() {
   }, [qid]);
 
   return (
+
     <div className="container mt-4">
       {/* Tabs */}
       <div className="d-flex mb-4">

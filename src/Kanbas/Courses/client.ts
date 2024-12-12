@@ -53,7 +53,6 @@ export const findQuizzesForCourse = async (courseId: string) => {
 
 
 export const createQuizzesForCourse = async (courseId: string, quiz: any) => {
-
   const quiz_with_id = { ...quiz, _id: new Date().getTime().toString() };
   console.log("Quiz being added", quiz_with_id);
   const response = await axiosWithCredentials.post(

@@ -1,3 +1,9 @@
+# Kanbas Quiz Implementation
+
+## CS4500 Fall Semester 2024
+
+By Aaron Johnson, Andrew Matthews, Jialin Wang, Tatiana Daradar
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

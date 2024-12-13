@@ -174,7 +174,7 @@ export default function Questions() {
   useEffect(() => {
     const totalPoints = questions.reduce((sum, q) => sum + q.content.point, 0);
     setPoints(totalPoints);
-    
+
     if (quiz && totalPoints !== quiz.points) {
       dispatch(updateQuiz({ ...quiz, points: totalPoints }));
       quizClient.updateQuiz({...quiz, points: totalPoints})
@@ -452,7 +452,7 @@ export default function Questions() {
       <hr className="my-4" />
 
       <div className="d-flex justify-content-center mt-2">
-        <button onClick={saveQuizQuestions} className="btn btn-danger">
+        <button onClick={handleCancel} className="btn btn-danger">
           Save
         </button>
         <button onClick={handleCancel} className="btn btn-secondary me-3">

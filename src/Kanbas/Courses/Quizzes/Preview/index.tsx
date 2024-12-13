@@ -35,7 +35,11 @@ export default function QuizPreview() {
     const handleAnswerChange = (questionId: string, answer: string, points: number) => {
         setAnswers((prevAnswers) => {
             const question = questions.find((q: any) => q._id === questionId); // Find the corresponding question
-            const isCorrect = question ? question.answer === answer : false; // Check if the answer is correct
+            const isCorrect = question
+                ? Array.isArray(question.answer) 
+                    ? question.answer.includes(answer) // Check if the answer is in the array
+                    : question.answer === answer // Check if the answer is a direct match
+                : false;// Check if the answer is correct
 
             const existing = prevAnswers.find((ans) => ans.questionId === questionId);
             if (existing) {

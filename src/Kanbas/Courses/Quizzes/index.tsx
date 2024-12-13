@@ -56,9 +56,10 @@ export default function Quizzes() {
   const getCorrectAnswerCount = (quizId: string) => {
     if (attempts) {
       const attempt = attempts.find((attempt: any) => attempt.quiz === quizId && attempt.user === currentUser._id);
-
+      
       if (attempt) {
         if (Array.isArray(attempt.answers) && attempt.answers.length > 0) {
+          console.log("attempt", attempt);
           // Sum points for all correct answers using answer.points
           const correctPoints = attempt.answers
             .filter((answer: any) => answer.isCorrect) // Filter correct answers
@@ -66,6 +67,7 @@ export default function Quizzes() {
               // Add the answer's points if it exists
               return total + (answer.points || 0);
             }, 0);
+            console.log("points", correctPoints)
 
           return correctPoints; // Return the total points for correct answers
         }

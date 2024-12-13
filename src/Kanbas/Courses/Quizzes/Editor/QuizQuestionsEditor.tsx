@@ -174,6 +174,11 @@ export default function Questions() {
   useEffect(() => {
     const totalPoints = questions.reduce((sum, q) => sum + q.content.point, 0);
     setPoints(totalPoints);
+    
+    if (quiz && totalPoints !== quiz.points) {
+      dispatch(updateQuiz({ ...quiz, points: totalPoints }));
+      quizClient.updateQuiz({...quiz, points: totalPoints})
+    }
   }, [questions]);
 
 

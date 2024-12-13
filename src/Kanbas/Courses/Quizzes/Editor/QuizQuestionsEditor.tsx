@@ -305,9 +305,8 @@ export default function Questions() {
 
     if (editingQuestionNumber !== null) {
       const newQuestions = [...questions];
-      newQuestion._id = questions[editingQuestionNumber]._id;
       newQuestions[editingQuestionNumber] = newQuestion;
-      setQuestions([...newQuestions]);
+      setQuestions(newQuestions);
     } else {
       setQuestions([...questions, newQuestion]);
     }

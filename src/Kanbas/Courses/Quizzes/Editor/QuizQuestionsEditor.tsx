@@ -314,12 +314,8 @@ export default function Questions() {
     if (editingQuestionNumber !== null) {
       const newQuestions = [...questions];
       newQuestions[editingQuestionNumber] = newQuestion;
-<<<<<<< HEAD
       questionsClient.updateQuestion(questions[editingQuestionNumber]._id, TranslateAddForDB(newQuestion))
       setQuestions([...newQuestions]);
-=======
-      setQuestions(newQuestions);
->>>>>>> 4fdc7119952a8548b5208eef89bd27ee0bd2638f
     } else {
       setQuestions([...questions, newQuestion]);
       quizClient.createQuestionForQuiz(qid as string, TranslateAddForDB(newQuestion))

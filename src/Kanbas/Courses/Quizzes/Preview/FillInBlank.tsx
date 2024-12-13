@@ -14,7 +14,9 @@ export default function FillInBlankQuestion({
         }
     };
 
-    const isCorrect = userAnswer === question.answer;
+    const isCorrect = Array.isArray(question.answer)
+    ? question.answer.includes(userAnswer)
+    : userAnswer === question.answer;
 
     return (
         <div className="d-flex justify-content-center align-items-center">

@@ -18,7 +18,7 @@ export default function MultipleChoiceQuestion({
 
     const isCorrect = Array.isArray(question.answer)
     ? question.answer.includes(userAnswer)
-    : userAnswer === question.answer;
+    : String(userAnswer) === String(question.answer);
     return (
         <div
           className="d-flex justify-content-center align-items-center "        >

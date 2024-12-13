@@ -38,7 +38,7 @@ export default function QuizPreview() {
             const isCorrect = question
                 ? Array.isArray(question.answer) 
                     ? question.answer.includes(answer) // Check if the answer is in the array
-                    : question.answer === answer // Check if the answer is a direct match
+                    : String(question.answer) === String(answer) // Check if the answer is a direct match
                 : false;// Check if the answer is correct
 
             const existing = prevAnswers.find((ans) => ans.questionId === questionId);

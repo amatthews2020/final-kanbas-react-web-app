@@ -9,126 +9,62 @@ export default function FillInTheBlankContent({
   content: FillInTheBlankQuestionContent;
   setContent: (content: FillInTheBlankQuestionContent) => void;
 }) {
-  const addChoice = () => {
-    setContent({
-      ...content,
-      answer: [...content.answer, [`Answer${content.blanks.length + 1}`]],
-      blanks: [...content.blanks, `Prompt${content.blanks.length + 1}`],
-    });
+  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setContent({ ...content, text: e.target.value });
   };
 
-  const setPrompt = (index: number, prompt: string) => {
-    setContent({
-      ...content,
-      blanks: content.blanks.map((oldValue, i) =>
-        i === index ? prompt : oldValue
-      ),
-    });
+  const handleAnswerChange = (index: number, value: string) => {
+    const newAnswers = [...content.answer];
+    newAnswers[index] = value;
+    setContent({ ...content, answer: newAnswers });
   };
 
-  const setAnswerOption = (index: number, subindex: number, ans: string) => {
-    const newOptions = [...content.answer[index]];
-    newOptions[subindex] = ans;
-    const newAnswer = [...content.answer];
-    newAnswer[index] = newOptions;
-    setContent({
-      ...content,
-      answer: newAnswer,
-    });
+  const addBlank = () => {
+    setContent({ ...content, answer: [...content.answer, ""] });
   };
 
-  const addOption = (index: number) => {
-    const newOption = [...content.answer[index], "option"];
-    const newAnswer = [...content.answer];
-    newAnswer[index] = newOption;
-    setContent({
-      ...content,
-      answer: newAnswer,
-    });
-  };
-
-  const removeOption = (index: number, subindex: number) => {
-    const newOption = [...content.answer[index]];
-    if (newOption.length <= 1) {
-      const newAnswer = [...content.answer];
-      const newBlanks = [...content.blanks];
-      newAnswer.splice(index, 1);
-      newBlanks.splice(index, 1);
-      setContent({
-        ...content,
-        answer: newAnswer,
-        blanks: newBlanks
-      })
-      return;
+  const deleteBlank = (index: number) => {
+    if (window.confirm("Are you sure you want to delete this blank?")) {
+      const newAnswers = content.answer.filter((_, i) => i !== index);
+      setContent({ ...content, answer: newAnswers });
     }
-    newOption.splice(subindex, 1);
-    const newAnswer = [...content.answer];
-    newAnswer[index] = newOption;
-    setContent({
-      ...content,
-      answer: newAnswer
-    })
-  }
-
-  const questionTextHandler = (e: any) => {
-    setContent({
-      ...content,
-      text: e.target.value,
-    });
   };
+
   return (
     <div>
-      <h6>Question</h6>
-      <input
-        className="form-control"
-        value={content.text}
-        onChange={questionTextHandler}
-        placeholder="Question Text"
-      />
-      <br></br>
-      {content.blanks.map((prompt, index) => (
-        <div className="d-flex pb-1">
-          <div>
-            {content.answer[index].map((option: string, subindex: number) => {
-              return (
-                <div className="d-flex">
-                  {subindex === 0 ? <input
-                    className="form-control"
-                    value={prompt}
-                    onChange={(e) => {
-                      setPrompt(index, e.target.value);
-                    }}
-                    placeholder={`Prompt${index + 1}`}
-                  /> : <div className="w-100"></div>}
-                  <input
-                    className="form-control"
-                    value={content.answer[index][subindex]}
-                    onChange={(e) => {
-                      setAnswerOption(index, subindex, e.target.value);
-                    }}
-                    placeholder={`Answer${index + 1}`}
-                  />
-                  <FaTrash className="fs-3 wd-clickable m-2" onClick={() => {
-                    removeOption(index, subindex);
-                  }}></FaTrash>
-                </div>
-              );
-            })}
+      <div>
+        <label>Question Text:</label>
+        <input
+          type="text"
+          value={content.text}
+          onChange={handleTextChange}
+          className="form-control"
+        />
+      </div>
+      <div>
+        <label>Blanks and Answers:</label>
+        {content.answer.map((answer: string, index: number) => (
+          <div key={index} className="mb-2">
+            <input
+              type="text"
+              value={answer}
+              onChange={(e) => handleAnswerChange(index, e.target.value)}
+              className="form-control d-inline-block w-75"
+            />
+            <button
+              onClick={() => deleteBlank(index)}
+              className="btn btn-danger ml-2"
+            >
+              Delete
+            </button>
           </div>
-          <button
-            className="btn btn-primary"
-            onClick={() => {
-              addOption(index);
-            }}
-          >
-            +
-          </button>
-        </div>
-      ))}
-      <br></br>
-      <Button variant="primary" onClick={addChoice}>
-        +Add Another Blank
-      </Button>
+        ))}
+        <button onClick={addBlank} className="btn btn-primary mt-2">
+          Add Blank
+        </button>
+      </div>
     </div>
   );
 }
+
+

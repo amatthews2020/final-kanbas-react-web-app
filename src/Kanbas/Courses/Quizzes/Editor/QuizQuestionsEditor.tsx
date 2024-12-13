@@ -10,6 +10,7 @@ import FillInTheBlankContent from "./FillInTheBlankContent";
 import MultipleChoiceContent from "./MultipleChoiceContent";
 import TrueFalseContent from "./TrueFalseContent";
 import * as quizClient from "../client";
+import * as questionsClient from "../Questions/client"
 import { get } from "http";
 
 // Define types for each QuizQuestion type
@@ -42,8 +43,7 @@ export declare type MultipleChoiceQuestion = {
 
 export declare type FillInTheBlankQuestionContent = {
   text: string;
-  blanks: string[];
-  answer: string[][];
+  answer: string[];
   point: number;
 };
 
@@ -89,7 +89,7 @@ export default function Questions() {
 
   const tfDefault = { text: "", answer: true, point: 0 };
   const mcDefault = { text: "", choices: [], answer: "", point: 0 };
-  const fitbDefault = { text: "", blanks: [], answer: [], point: 0 };
+  const fitbDefault = { text: "", answer: [], point: 0 };
 
   const [tfContent, setTfContent] = useState<TrueFalseQuestionContent>({
     ...tfDefault,
@@ -142,7 +142,6 @@ export default function Questions() {
     } else {
       fitbq = {
         text: question.question,
-        blanks: question.choices,
         answer: question.answer,
         point: question.points,
       };
@@ -175,6 +174,11 @@ export default function Questions() {
   useEffect(() => {
     const totalPoints = questions.reduce((sum, q) => sum + q.content.point, 0);
     setPoints(totalPoints);
+
+    if (quiz && totalPoints !== quiz.points) {
+      dispatch(updateQuiz({ ...quiz, points: totalPoints }));
+      quizClient.updateQuiz({...quiz, points: totalPoints})
+    }
   }, [questions]);
 
 
@@ -207,18 +211,18 @@ export default function Questions() {
     if (question.type === "TRUEFALSE") {
       return {
         _id: question._id,
-        title: "Question " + questions.length,
+        title: "Question " + (questions.length + 1),
         type: "True False",
         quiz: qid,
         points: question.content.point,
         question: question.content.text,
         answer: question.content.answer,
-        choices: ["True", "False"],
+        choices: ["true", "false"],
       };
     } else if (question.type === "MULTIPLECHOICE") {
       return {
         _id: question._id,
-        title: "Question " + questions.length,
+        title: "Question " + (questions.length + 1),
         type: "Multiple Choice",
         quiz: qid,
         points: question.content.point,
@@ -229,18 +233,27 @@ export default function Questions() {
     } else {
       return {
         _id: question._id,
-        title: "Question " + questions.length,
+        title: "Question " + (questions.length + 1),
         type: "Fill in the Blank",
         quiz: qid,
         points: question.content.point,
         question: question.content.text,
         answer: question.content.answer,
-        choices: question.content.blanks,
       };
     }
   }
-  const handleDelete = (question: QuizQuestion) => {
-    setQuestions(questions.filter((q) => q._id !== question._id));
+  const handleDelete = async (question: QuizQuestion) => {
+    try {
+      setQuestions(questions.filter((q) => q._id !== question._id));
+      if (question._id) {
+        await questionsClient.deleteQuestion(question._id);
+      } else {
+        console.log("Question not saved to the database yet. Skipping delete.");
+      }
+    } catch (error) {
+      console.log('Question wasnt saved yet', error);
+    }
+
   };
 
   const handleEdit = (questionNumber: number) => {
@@ -305,10 +318,13 @@ export default function Questions() {
 
     if (editingQuestionNumber !== null) {
       const newQuestions = [...questions];
+      newQuestion._id = questions[editingQuestionNumber]._id;
       newQuestions[editingQuestionNumber] = newQuestion;
-      setQuestions(newQuestions);
+      questionsClient.updateQuestion(questions[editingQuestionNumber]._id, TranslateAddForDB(newQuestion))
+      setQuestions([...newQuestions]);
     } else {
       setQuestions([...questions, newQuestion]);
+      quizClient.createQuestionForQuiz(qid as string, TranslateAddForDB(newQuestion))
     }
     resetQuestions();
     setShowConfigModal(false);
@@ -436,7 +452,7 @@ export default function Questions() {
       <hr className="my-4" />
 
       <div className="d-flex justify-content-center mt-2">
-        <button onClick={saveQuizQuestions} className="btn btn-danger">
+        <button onClick={handleCancel} className="btn btn-danger">
           Save
         </button>
         <button onClick={handleCancel} className="btn btn-secondary me-3">

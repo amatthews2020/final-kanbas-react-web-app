@@ -260,6 +260,7 @@ export default function Questions() {
         break;
     }
     setShowTypeModal(true);
+    // comment
   };
 
   const handleTypeSelect = (type: string) => {

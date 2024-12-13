@@ -9,7 +9,8 @@ import { setQuizzes, updateQuiz } from "../reducer";
 import FillInTheBlankContent from "./FillInTheBlankContent";
 import MultipleChoiceContent from "./MultipleChoiceContent";
 import TrueFalseContent from "./TrueFalseContent";
-import * as quizzesClient from "../client";
+import * as quizClient from "../client";
+import * as questionsClient from "../Questions/client"
 import { get } from "http";
 
 // Define types for each QuizQuestion type
@@ -42,8 +43,7 @@ export declare type MultipleChoiceQuestion = {
 
 export declare type FillInTheBlankQuestionContent = {
   text: string;
-  blanks: string[];
-  answer: string[][];
+  answer: string[];
   point: number;
 };
 
@@ -75,6 +75,7 @@ export default function Questions() {
 
   // Use local state to manage temporary QuizQuestion changes
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+  const [prevQuestions, setPrevQuestions] = useState<QuizQuestion[]>([]);
   const [points, setPoints] = useState(quiz?.points || 0);
   const [showTypeModal, setShowTypeModal] = useState(false);
   const [selectedType, setSelectedType] = useState<string | null>(null);
@@ -88,7 +89,7 @@ export default function Questions() {
 
   const tfDefault = { text: "", answer: true, point: 0 };
   const mcDefault = { text: "", choices: [], answer: "", point: 0 };
-  const fitbDefault = { text: "", blanks: [], answer: [], point: 0 };
+  const fitbDefault = { text: "", answer: [], point: 0 };
 
   const [tfContent, setTfContent] = useState<TrueFalseQuestionContent>({
     ...tfDefault,
@@ -141,7 +142,6 @@ export default function Questions() {
     } else {
       fitbq = {
         text: question.question,
-        blanks: question.choices,
         answer: question.answer,
         point: question.points,
       };
@@ -155,18 +155,19 @@ export default function Questions() {
     return newQuestion;
   }
 
-  const getQuestionsForQuiz = async () => {
-    const db_questions = await quizzesClient.findQuestionsForQuiz(qid as string);
-    console.log("DB Questions", db_questions);
-    db_questions.forEach((question: any) => {
-      setQuestions((prev) => [...prev, translateFromDB(question)]);
-    })
-    console.log("Questions", questions);
-  }
+  const fetchQuestions = async () => {
+    if (qid) {
+      const questions = await quizClient.findQuestionsForQuiz(qid);
+      const quiz_questions = questions.map((q: any) => translateFromDB(q));
+      setQuestions(quiz_questions);
+      setPrevQuestions(quiz_questions);
+      console.log("Previous", questions);
+    }
+  };
 
   useEffect(() => {
     if (quiz) {
-      getQuestionsForQuiz();
+      fetchQuestions();
     }
   }, [quiz]);
 
@@ -201,21 +202,22 @@ export default function Questions() {
   };
 
   const TranslateAddForDB = (question: QuizQuestion) => {
+    console.log("Question being translated", question);
     if (question.type === "TRUEFALSE") {
       return {
-        _id: new Date().getTime().toString(),
-        title: "Question " + question._id,
+        _id: question._id,
+        title: "Question " + (questions.length + 1),
         type: "True False",
         quiz: qid,
         points: question.content.point,
         question: question.content.text,
         answer: question.content.answer,
-        choices: ["True", "False"],
+        choices: ["true", "false"],
       };
     } else if (question.type === "MULTIPLECHOICE") {
       return {
-        _id: new Date().getTime().toString(),
-        title: "Question" + question._id,
+        _id: question._id,
+        title: "Question " + (questions.length + 1),
         type: "Multiple Choice",
         quiz: qid,
         points: question.content.point,
@@ -225,19 +227,28 @@ export default function Questions() {
       };
     } else {
       return {
-        _id: new Date().getTime().toString(),
-        title: "Question" + question._id,
+        _id: question._id,
+        title: "Question " + (questions.length + 1),
         type: "Fill in the Blank",
         quiz: qid,
         points: question.content.point,
         question: question.content.text,
         answer: question.content.answer,
-        choices: question.content.blanks,
       };
     }
   }
-  const handleDelete = (question: QuizQuestion) => {
-    setQuestions(questions.filter((q) => q._id !== question._id));
+  const handleDelete = async (question: QuizQuestion) => {
+    try {
+      setQuestions(questions.filter((q) => q._id !== question._id));
+      if (question._id) {
+        await questionsClient.deleteQuestion(question._id);
+      } else {
+        console.log("Question not saved to the database yet. Skipping delete.");
+      }
+    } catch (error) {
+      console.log('Question wasnt saved yet', error);
+    }
+
   };
 
   const handleEdit = (questionNumber: number) => {
@@ -271,7 +282,7 @@ export default function Questions() {
     if (selectedType === "TRUEFALSE") {
       newQuestion = {
         _id: new Date().getTime().toString(),
-        sequence: questions.length + 1,
+        sequence: questions.length,
         type: "TRUEFALSE",
         content: {
           ...tfContent,
@@ -281,7 +292,7 @@ export default function Questions() {
     } else if (selectedType === "MULTIPLECHOICE") {
       newQuestion = {
         _id: new Date().getTime().toString(),
-        sequence: questions.length + 1,
+        sequence: questions.length,
         type: "MULTIPLECHOICE",
         content: {
           ...mcContent,
@@ -291,7 +302,7 @@ export default function Questions() {
     } else {
       newQuestion = {
         _id: new Date().getTime().toString(),
-        sequence: questions.length + 1,
+        sequence: questions.length,
         type: "FILLINTHEBLANK",
         content: {
           ...fitbContent,
@@ -304,17 +315,33 @@ export default function Questions() {
       const newQuestions = [...questions];
       newQuestion._id = questions[editingQuestionNumber]._id;
       newQuestions[editingQuestionNumber] = newQuestion;
+      questionsClient.updateQuestion(questions[editingQuestionNumber]._id, TranslateAddForDB(newQuestion))
       setQuestions([...newQuestions]);
     } else {
       setQuestions([...questions, newQuestion]);
+      quizClient.createQuestionForQuiz(qid as string, TranslateAddForDB(newQuestion))
     }
     resetQuestions();
     setShowConfigModal(false);
   };
 
-  const sendQuestion = async (question: any) => {
-    await quizzesClient.createQuestionForQuiz(qid as string, question);
-  }
+  const sendQuestion = async (question_input: any) => {
+    console.log("Question being sent:", question_input);
+    console.log("Previous Questions:", prevQuestions);
+    console.log("Question id:", question_input._id);
+
+    const existingQuestion = prevQuestions.find(
+      (qui) => qui._id?.toString() === question_input._id?.toString()
+    );
+
+    if (existingQuestion) {
+      console.log("Updating existing question");
+      await quizClient.updateQuestionForQuiz(qid as string, existingQuestion);
+    } else {
+      console.log("Creating new question,", question_input);
+      await quizClient.createQuestionForQuiz(qid as string, question_input);
+    }
+  };
 
   const saveQuizQuestions = () => {
     questions.forEach((q) => {

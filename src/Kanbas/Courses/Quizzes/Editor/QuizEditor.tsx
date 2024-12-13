@@ -43,6 +43,8 @@ export default function QuizEditor() {
     quizzes.find((q: any) => q._id === qid) || { ...defaultQuizData }
   );
 
+
+
   const fetchQuiz = async () => {
     const quiz = await coursesClient.findQuizzesForCourse(cid as string);
     dispatch(setQuizzes(quiz));
